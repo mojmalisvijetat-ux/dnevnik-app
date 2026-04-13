@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gesundheitstagebuch</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 980px;
+      margin: 20px auto;
+      background: #eaf4ff;
+      padding: 15px;
+      color: #1f2937;
+    }
+
+    h1, h2 {
+      margin-bottom: 10px;
+    }
+
+    .section {
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      border: 1px solid #dbe7f3;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 700px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input, textarea, select, button {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 9px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #bfcddd;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .button-row button {
+      flex: 1;
+      min-width: 180px;
+      cursor: pointer;
+      background: #f3f7fb;
+    }
+
+    .button-row button:hover {
+      background: #e9f1f8;
+    }
+
+    input.prazno,
+    textarea.prazno,
+    select.prazno {
+      background-color: #fff3cd !important;
+    }
+
+    input.popunjeno,
+    textarea.popunjeno,
+    select.popunjeno {
+      background-color: #d4edda !important;
+    }
+
+    input.crveno {
+      background-color: #f8d7da !important;
+    }
+
+    .entry {
+      background: white;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid #d8e3ee;
+    }
+
+    .result {
+      background: #f8fbff;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 8px;
+      border: 1px solid #d8e3ee;
+      white-space: pre-wrap;
+    }
+
+    .status {
+      background: #eef5ff;
+      border: 1px solid #cdddf7;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      margin-top: 12px;
+    }
+
+    .warn {
+      background: #fde2e1;
+      border: 1px solid #f3b2ae;
+      color: #8a1c1c;
+    }
+
+    .ok {
+      background: #e7f6ea;
+      border: 1px solid #bfe0c5;
+      color: #1e5f2d;
+    }
+
+    canvas {
+      width: 100%;
+      max-width: 100%;
+      background: white;
+      border: 1px solid #d8e3ee;
+      border-radius: 10px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Gesundheitstagebuch</h1>
+
+  <div class="section">
+    <div class="grid">
+      <div>
+        <label for="datum">Datum</label>
+        <input id="datum" type="date">
+      </div>
+
+      <div>
+        <label for="zeit">Uhrzeit</label>
+        <input id="zeit" type="time">
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label for="koerper">Körperteil</label>
+        <select id="koerper">
+          <option value="">-- auswählen --</option>
+          <option>Kopf</option>
+          <option>linkes Sprunggelenk</option>
+          <option>rechtes Sprunggelenk</option>
+          <option>linker Fuß</option>
+          <option>rechter Fuß</option>
+          <option>mittlerer Fußbereich</option>
+          <option>linkes Bein</option>
+          <option>rechtes Bein</option>
+          <option>ganzer Körper</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="symptom">Symptom</label>
+        <select id="symptom">
+          <option value="">-- auswählen --</option>
+          <option>Schmerz</option>
+          <option>dumpfer Schmerz</option>
+          <option>stechender Schmerz</option>
+          <option>Zittern</option>
+          <option>Kribbeln</option>
+          <option>Schwellung</option>
+          <option>Instabilität</option>
+          <option>visuelle Störungen</option>
+          <option>Sturz</option>
+          <option>geringere Schmerzen</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label for="ausloeser">Auslöser</label>
+        <select id="ausloeser">
+          <option value="">-- auswählen --</option>
+          <option>in Ruhe</option>
+          <option>beim Gehen</option>
+          <option>beim Vorbeugen</option>
+          <option>beim Vorbeugen im Sitzen</option>
+          <option>nach Belastung</option>
+          <option>nach einer Injektion</option>
+          <option>nach kurzer Gehstrecke</option>
+          <option>abends nach Belastung</option>
+          <option>ohne klaren Auslöser</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="intens">Intensität (0-10)</label>
+        <input id="intens" type="number" min="0" max="10" placeholder="z. B. 7">
+      </div>
+    </div>
+
+    <label for="bem">Bemerkung</label>
+    <textarea id="bem" placeholder="Kurze zusätzliche Notiz auf Deutsch"></textarea>
+
+    <div class="button-row">
+      <button onclick="heutigesDatum()">Heutiges Datum</button>
+      <button onclick="generiere()">Deutsch generieren</button>
+      <button onclick="kopierenDeutsch()">Deutsch kopieren</button>
+      <button onclick="speichern()">Speichern</button>
+    </div>
+
+    <div class="button-row">
+      <button onclick="neuerEintrag()">Neuer Eintrag</button>
+      <button onclick="letztenLoeschen()">Letzten Eintrag löschen</button>
+      <button onclick="berichtErstellen()">Bericht erstellen</button>
+      <button onclick="berichtKopieren()">Bericht kopieren</button>
+    </div>
+
+    <div class="button-row">
+      <button onclick="exportTXT()">Export TXT</button>
+      <button onclick="exportCSV()">Export CSV</button>
+    </div>
+
+    <div id="status" class="status">Bereit für einen neuen Eintrag.</div>
+
+    <label>Generierter deutscher Eintrag</label>
+    <div id="deutsch" class="result"></div>
+
+    <label>Bericht für Arzt</label>
+    <div id="report" class="result"></div>
+  </div>
+
+  <div class="section">
+    <h2>Analyse</h2>
+    <div id="analyse" class="result"></div>
+    <div id="trendInfo" class="status">Noch keine Trendanalyse möglich.</div>
+  </div>
+
+  <div class="section">
+    <h2>Verlauf Intensität</h2>
+    <canvas id="chart" width="900" height="320"></canvas>
+  </div>
+
+  <div class="section">
+    <h2>Einträge</h2>
+    <div id="liste"></div>
+  </div>
+
+  <script>
+    let data = JSON.parse(localStorage.getItem("tagebuch_v4")) || [];
+
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function text(v) {
+      return v ? v.trim() : "";
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function setStatus(msg, typ = "normal") {
+      const el = $("status");
+      el.textContent = msg;
+      el.className = "status";
+      if (typ === "warn") el.classList.add("warn");
+      if (typ === "ok") el.classList.add("ok");
+    }
+
+    function mark(el) {
+      el.classList.remove("prazno", "popunjeno", "crveno");
+
+      const vrijednost = (el.value || "").trim();
+
+      if (vrijednost === "") {
+        el.classList.add("prazno");
+        return;
+      }
+
+      if (el.id === "intens") {
+        const broj = Number(vrijednost);
+        if (!isNaN(broj) && broj >= 7) {
+          el.classList.add("crveno");
+          return;
+        }
+      }
+
+      el.classList.add("popunjeno");
+    }
+
+    function markAll() {
+      document.querySelectorAll("input, textarea, select").forEach(function(el) {
+        mark(el);
+      });
+    }
+
+    function heutigesDatum() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      $("datum").value = `${yyyy}-${mm}-${dd}`;
+      markAll();
+      setStatus("Heutiges Datum wurde eingetragen.", "ok");
+    }
+
+    function generiere() {
+      const datum = text($("datum").value);
+      const zeit = text($("zeit").value);
+      const koerper = text($("koerper").value);
+      const symptom = text($("symptom").value);
+      const ausloeser = text($("ausloeser").value);
+      const intens = text($("intens").value);
+      const bem = text($("bem").value);
+
+      let out = "DATUM: " + (datum || "-");
+      if (zeit) out += ", Uhrzeit: " + zeit;
+      out += "\nEREIGNIS / SYMPTOM:\n";
+
+      let satz = ausloeser ? ausloeser.charAt(0).toUpperCase() + ausloeser.slice(1) : "Ohne klaren Auslöser";
+
+      if (symptom) {
+        satz += " trat ";
+        satz += symptom === "Sturz" ? "ein Sturz" : symptom;
+        satz += " auf";
+      } else {
+        satz += " trat ein Symptom auf";
+      }
+
+      if (koerper) satz += " im Bereich " + koerper;
+      if (intens !== "") satz += ". Intensität: " + intens + "/10";
+      satz += ".";
+
+      out += satz;
+
+      if (bem) out += "\nBemerkung:\n" + bem;
+
+      $("deutsch").textContent = out;
+      setStatus("Deutscher Eintrag wurde generiert.", "ok");
+      return out;
+    }
+
+    async function kopierenDeutsch() {
+      let val = $("deutsch").textContent.trim();
+      if (!val) val = generiere().trim();
+
+      if (!val) {
+        setStatus("Kein deutscher Eintrag vorhanden.", "warn");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(val);
+        setStatus("Deutscher Eintrag wurde kopiert.", "ok");
+      } catch {
+        setStatus("Kopieren nicht möglich. Bitte Text manuell markieren.", "warn");
+      }
+    }
+
+    function speichern() {
+      const generated = generiere();
+
+      const datum = text($("datum").value);
+      const zeit = text($("zeit").value);
+      const koerper = text($("koerper").value);
+      const symptom = text($("symptom").value);
+      const ausloeser = text($("ausloeser").value);
+      const intensRaw = text($("intens").value);
+      const bem = text($("bem").value);
+
+      if (!datum && !symptom && !bem) {
+        alert("Bitte mindestens Datum, Symptom oder Bemerkung eingeben.");
+        return;
+      }
+
+      const entry = {
+        datum,
+        zeit,
+        koerper,
+        symptom,
+        ausloeser,
+        intens: intensRaw === "" ? null : Number(intensRaw),
+        bem,
+        deutsch: generated
+      };
+
+      data.push(entry);
+      localStorage.setItem("tagebuch_v4", JSON.stringify(data));
+
+      anzeigen();
+      berichtErstellen();
+      setStatus("Eintrag wurde gespeichert.", "ok");
+    }
+
+    function neuerEintrag() {
+      $("datum").value = "";
+      $("zeit").value = "";
+      $("koerper").value = "";
+      $("symptom").value = "";
+      $("ausloeser").value = "";
+      $("intens").value = "";
+      $("bem").value = "";
+      $("deutsch").textContent = "";
+      markAll();
+      setStatus("Formular ist bereit für einen neuen Eintrag.", "ok");
+    }
+
+    function letztenLoeschen() {
+      if (data.length === 0) {
+        setStatus("Keine Einträge zum Löschen vorhanden.", "warn");
+        return;
+      }
+
+      if (!confirm("Möchtest du den letzten Eintrag wirklich löschen?")) {
+        setStatus("Löschen wurde abgebrochen.");
+        return;
+      }
+
+      data.pop();
+      localStorage.setItem("tagebuch_v4", JSON.stringify(data));
+      anzeigen();
+      berichtErstellen();
+      setStatus("Letzter Eintrag wurde gelöscht.", "ok");
+    }
+
+    function sortierteDaten() {
+      return [...data].sort((a, b) => {
+        const aa = (a.datum || "") + " " + (a.zeit || "");
+        const bb = (b.datum || "") + " " + (b.zeit || "");
+        return aa.localeCompare(bb);
+      });
+    }
+
+    function berichtErstellen() {
+      if (data.length === 0) {
+        $("report").textContent = "Keine gespeicherten Einträge vorhanden.";
+        return;
+      }
+
+      const arr = sortierteDaten();
+      let txt = "Symptomtagebuch\n\n";
+
+      arr.forEach(e => {
+        txt += "----------------------------------\n\n";
+        txt += e.deutsch.trim() + "\n";
+        txt += "UNTERSUCHUNG / ARZT:\n";
+        txt += "BEFUND: NEIN\n\n";
+      });
+
+      txt += "----------------------------------";
+      $("report").textContent = txt;
+      setStatus("Bericht wurde erstellt.", "ok");
+    }
+
+    async function berichtKopieren() {
+      let val = $("report").textContent.trim();
+      if (!val) {
+        berichtErstellen();
+        val = $("report").textContent.trim();
+      }
+
+      if (!val) {
+        setStatus("Kein Bericht vorhanden.", "warn");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(val);
+        setStatus("Bericht wurde kopiert.", "ok");
+      } catch {
+        setStatus("Bericht konnte nicht kopiert werden.", "warn");
+      }
+    }
+
+    function exportTXT() {
+      if (data.length === 0) {
+        setStatus("Keine Daten für Export vorhanden.", "warn");
+        return;
+      }
+
+      const arr = sortierteDaten();
+      let txt = "Symptomtagebuch\n\n";
+
+      arr.forEach(e => {
+        txt += "----------------------------------\n\n";
+        txt += e.deutsch.trim() + "\n";
+        txt += "UNTERSUCHUNG / ARZT:\n";
+        txt += "BEFUND: NEIN\n\n";
+      });
+
+      txt += "----------------------------------";
+      downloadFile(txt, "symptomtagebuch.txt", "text/plain;charset=utf-8");
+      setStatus("TXT-Datei wurde exportiert.", "ok");
+    }
+
+    function exportCSV() {
+      if (data.length === 0) {
+        setStatus("Keine Daten für Export vorhanden.", "warn");
+        return;
+      }
+
+      let csv = "Datum;Uhrzeit;Körperteil;Symptom;Auslöser;Intensität;Bemerkung\n";
+
+      sortierteDaten().forEach(e => {
+        const row = [
+          e.datum || "",
+          e.zeit || "",
+          e.koerper || "",
+          e.symptom || "",
+          e.ausloeser || "",
+          e.intens ?? "",
+          (e.bem || "").replace(/;/g, ",").replace(/\n/g, " ")
+        ];
+        csv += row.join(";") + "\n";
+      });
+
+      downloadFile(csv, "symptomtagebuch.csv", "text/csv;charset=utf-8");
+      setStatus("CSV-Datei wurde exportiert.", "ok");
+    }
+
+    function downloadFile(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function anzeigen() {
+      const liste = $("liste");
+      liste.innerHTML = "";
+
+      [...data].reverse().forEach(e => {
+        liste.innerHTML += "<div class='entry'><pre style='margin:0; white-space:pre-wrap;'>" + escapeHtml(e.deutsch) + "</pre></div>";
+      });
+
+      analyse();
+      zeichneChart();
+    }
+
+    function analyse() {
+      if (data.length === 0) {
+        $("analyse").textContent = "Keine Analyse möglich.";
+        $("trendInfo").textContent = "Noch keine Trendanalyse möglich.";
+        $("trendInfo").className = "status";
+        return;
+      }
+
+      const werte = data
+        .filter(e => typeof e.intens === "number" && !isNaN(e.intens))
+        .map(e => e.intens);
+
+      const count = data.length;
+      const mitIntens = werte.length;
+      const max = mitIntens ? Math.max(...werte) : "-";
+      const avg = mitIntens ? (werte.reduce((a, b) => a + b, 0) / mitIntens).toFixed(1) : "-";
+      const stark = werte.filter(v => v >= 7).length;
+      const zittern = data.filter(e => e.symptom === "Zittern").length;
+      const schmerz = data.filter(e =>
+        e.symptom === "Schmerz" ||
+        e.symptom === "dumpfer Schmerz" ||
+        e.symptom === "stechender Schmerz" ||
+        e.symptom === "geringere Schmerzen"
+      ).length;
+      const sturz = data.filter(e => e.symptom === "Sturz").length;
+
+      $("analyse").innerHTML =
+        "Anzahl Einträge: " + count + "<br>" +
+        "Einträge mit Intensität: " + mitIntens + "<br>" +
+        "Durchschnittliche Intensität: " + avg + "<br>" +
+        "Höchste Intensität: " + max + "<br>" +
+        "Einträge mit Intensität 7 oder höher: " + stark + "<br>" +
+        "Einträge mit Zittern: " + zittern + "<br>" +
+        "Einträge mit Schmerz: " + schmerz + "<br>" +
+        "Einträge mit Sturz: " + sturz;
+
+      trendAnalyse();
+    }
+
+    function trendAnalyse() {
+      const arr = sortierteDaten().filter(e => typeof e.intens === "number" && !isNaN(e.intens));
+
+      const box = $("trendInfo");
+      box.className = "status";
+
+      if (arr.length < 3) {
+        box.textContent = "Für eine Trendanalyse werden mindestens 3 Einträge mit Intensität benötigt.";
+        return;
+      }
+
+      const letzte3 = arr.slice(-3).map(e => e.intens);
+
+      if (letzte3[0] < letzte3[1] && letzte3[1] < letzte3[2]) {
+        box.textContent = "Achtung: Die letzten 3 Intensitätswerte steigen an (" + letzte3.join(" -> ") + ").";
+        box.classList.add("warn");
+      } else if (letzte3[0] > letzte3[1] && letzte3[1] > letzte3[2]) {
+        box.textContent = "Gut: Die letzten 3 Intensitätswerte sinken (" + letzte3.join(" -> ") + ").";
+        box.classList.add("ok");
+      } else {
+        box.textContent = "Kein klarer Trend in den letzten 3 Intensitätswerten (" + letzte3.join(" -> ") + ").";
+      }
+    }
+
+    function zeichneChart() {
+      const canvas = $("chart");
+      const ctx = canvas.getContext("2d");
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const arr = sortierteDaten().filter(e => typeof e.intens === "number" && !isNaN(e.intens));
+
+      ctx.font = "14px Arial";
+      ctx.fillStyle = "#334155";
+
+      if (arr.length === 0) {
+        ctx.fillText("Keine Intensitätsdaten vorhanden.", 20, 40);
+        return;
+      }
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const left = 60;
+      const right = 20;
+      const top = 20;
+      const bottom = 45;
+
+      const chartW = w - left - right;
+      const chartH = h - top - bottom;
+
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 1;
+
+      ctx.beginPath();
+      ctx.moveTo(left, top);
+      ctx.lineTo(left, h - bottom);
+      ctx.lineTo(w - right, h - bottom);
+      ctx.stroke();
+
+      for (let y = 0; y <= 10; y++) {
+        const py = top + chartH - (y / 10) * chartH;
+        ctx.strokeStyle = "#e5edf5";
+        ctx.beginPath();
+        ctx.moveTo(left, py);
+        ctx.lineTo(w - right, py);
+        ctx.stroke();
+
+        ctx.fillStyle = "#475569";
+        ctx.fillText(String(y), 30, py + 4);
+      }
+
+      const points = arr.map((e, i) => {
+        const x = arr.length === 1
+          ? left + chartW / 2
+          : left + (i / (arr.length - 1)) * chartW;
+        const y = top + chartH - (e.intens / 10) * chartH;
+        return { x, y, label: e.datum || ("Eintrag " + (i + 1)), intens: e.intens };
+      });
+
+      ctx.strokeStyle = "#2563eb";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      points.forEach((p, i) => {
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+
+      points.forEach(p => {
+        ctx.beginPath();
+        ctx.fillStyle = p.intens >= 7 ? "#dc2626" : "#16a34a";
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.fillStyle = "#334155";
+      points.forEach((p) => {
+        const shortLabel = p.label ? p.label.slice(5) : "";
+        ctx.fillText(shortLabel, Math.max(left, p.x - 18), h - 20);
+      });
+    }
+
+    window.addEventListener("load", function () {
+      document.querySelectorAll("input, textarea, select").forEach(function (el) {
+        el.addEventListener("input", function () { mark(el); });
+        el.addEventListener("change", function () { mark(el); });
+        mark(el);
+      });
+
+      anzeigen();
+      berichtErstellen();
+      markAll();
+    });
+  </script>
+
+</body>
+</html>
